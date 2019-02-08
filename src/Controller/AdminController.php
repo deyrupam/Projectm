@@ -18,6 +18,9 @@ use Cake\Core\Configure;
 use Cake\Http\Exception\ForbiddenException;
 use Cake\Http\Exception\NotFoundException;
 use Cake\View\Exception\MissingTemplateException;
+use Cake\ORM\TableRegistry;
+   use Cake\Datasource\ConnectionManager;
+   use Cake\Auth\DefaultPasswordHasher;
 
 /**
  * Static content controller
@@ -35,7 +38,8 @@ class AdminController extends AppController
 
         $result=$this->loadModel('assign_job');
         $data=$result->find('all', [ // or 'first'
-            'conditions' => ['status_job' => 0]
+            'conditions' => ['status_job' => 0],
+            
         ]);
         $this->set('viewdata',$data);
 
@@ -43,8 +47,27 @@ class AdminController extends AppController
     //         echo $row;
     //     }
 
+ 
     }
-   
+    public function add(){
+        if($this->request->is('post')){
+           $name = $this->request->getData('name');
+           $email = $this->request->getData('email');
+           $hashPswdObj = new DefaultPasswordHasher;
+           $password = $hashPswdObj->hash($this->request->getData('password'));
+           $user_type = $this->request->getData('user_type');
+           
+    $users_table = TableRegistry::get('users');
+           $users = $users_table->newEntity();
+           $users->name = $name;
+           $users->email = $email;
+           $users->password = $password;
+           $users->user_type = $user_type;
+        
+           if($users_table->save($users))
+           echo "User is added.";
+        }
+     }
 
     
 }
